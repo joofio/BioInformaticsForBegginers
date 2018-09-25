@@ -59,3 +59,53 @@ def Score(Motifs):
             if Motifs[i][j] != consensus[j]:
                 count += 1
     return count
+
+# Input:  String Text and profile matrix Profile
+# Output: Pr(Text, Profile)
+
+
+def Pr(Text, Profile):
+    k = len(Profile['A'])
+    result = 1
+    i = 0
+    for symbol in Text:
+        result = result*Profile[symbol][i]
+        i += 1
+    return result
+
+# Write your ProfileMostProbableKmer() function here.
+# The profile matrix assumes that the first row corresponds to A, the second corresponds to C,
+# the third corresponds to G, and the fourth corresponds to T.
+# You should represent the profile matrix as a dictionary whose keys are 'A', 'C', 'G', and 'T' and whose values are lists of floats
+
+
+def ProfileMostProbableKmer(text, k, profile):
+    n = len(text)
+    result = text[0:k]
+    m = 0
+    for i in range(n-k+1):
+        if Pr(text[i:i+k], profile) > m:
+            result = text[i:i+k]
+            m = Pr(text[i:i+k], profile)
+    return result
+
+# Input:  A list of kmers Dna, and integers k and t (where t is the number of kmers in Dna)
+# Output: GreedyMotifSearch(Dna, k, t)
+
+
+def GreedyMotifSearch(Dna, k, t):
+    BestMotifs = []
+    for i in range(0, t):
+        BestMotifs.append(Dna[i][0:k])
+
+    n = len(Dna[0])
+    for i in range(n-k+1):
+        Motifs = []
+        Motifs.append(Dna[0][i:i+k])
+        for j in range(1, t):
+            P = Profile(Motifs[0:j])
+            Motifs.append(ProfileMostProbableKmer(Dna[j], k, P))
+
+        if Score(Motifs) < Score(BestMotifs):
+            BestMotifs = Motifs
+    return BestMotifs
