@@ -115,8 +115,32 @@ def SkewArray(Genome):
         else:
             skew.append(skew[i])
     return skew
-         
 
+def MinimumSkew(Genome):
+    positions = [] # output variable
+    skew=SkewArray(Genome)
+    for i in range(len(skew)):
+        if skew[i] == min(skew):
+            positions.append(i)
+    return positions
 
+def HammingDistance(p, q):
+    hamming=0
+    for i in range(len(p)):
+        if p[i] != q[i]:
+            hamming+=1
+    return hamming
 
+def ApproximatePatternMatching(Text, Pattern, d):
+    positions = [] # initializing list of positions
+    for i in range(len(Text)-len(Pattern)+1):
+        if HammingDistance(Text[i:i+len(Pattern)],Pattern)<=d:
+            positions.append(i)
+    return positions
 
+def ApproximatePatternCount(Pattern, Text, d):
+    count = 0 # initialize count variable
+    for i in range(len(Text)-len(Pattern)+1):
+        if HammingDistance(Text[i:i+len(Pattern)],Pattern)<=d:
+            count +=1
+    return count
