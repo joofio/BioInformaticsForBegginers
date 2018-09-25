@@ -1,6 +1,6 @@
 # Input:  A set of kmers Motifs
 # Output: Count(Motifs)
-
+import random
 
 def Count(Motifs):
     count = {}  # initializing the count dictionary
@@ -65,18 +65,12 @@ def Score(Motifs):
 
 
 def Pr(Text, Profile):
-    k = len(Profile['A'])
     result = 1
     i = 0
     for symbol in Text:
         result = result*Profile[symbol][i]
         i += 1
     return result
-
-# Write your ProfileMostProbableKmer() function here.
-# The profile matrix assumes that the first row corresponds to A, the second corresponds to C,
-# the third corresponds to G, and the fourth corresponds to T.
-# You should represent the profile matrix as a dictionary whose keys are 'A', 'C', 'G', and 'T' and whose values are lists of floats
 
 
 def ProfileMostProbableKmer(text, k, profile):
@@ -109,3 +103,80 @@ def GreedyMotifSearch(Dna, k, t):
         if Score(Motifs) < Score(BestMotifs):
             BestMotifs = Motifs
     return BestMotifs
+
+
+# Input:  A set of kmers Motifs
+# Output: CountWithPseudocounts(Motifs)
+def CountWithPseudocounts(Motifs):
+    t = len(Motifs)
+    k = len(Motifs[0])
+    count = {}  # initializing the count dictionary
+    for symbol in "ACGT":
+        count[symbol] = []
+        for j in range(k):
+             count[symbol].append(1)
+    for i in range(t):
+        for j in range(k):
+            symbol = Motifs[i][j]
+            count[symbol][j] += 1
+    return count
+
+# Input:  A set of kmers Motifs
+# Output: ProfileWithPseudocounts(Motifs)
+def ProfileWithPseudocounts(Motifs):
+    t = len(Motifs)+4
+    k = len(Motifs[0])
+    profile = CountWithPseudocounts(Motifs)
+    for symbol in "ACGT":
+        for j in range(k):
+            profile[symbol][j] = profile[symbol][j]/(t)
+    return profile    
+
+def GreedyMotifSearchWithPseudocounts(Dna, k, t):
+    BestMotifs = []
+    for i in range(0, t):
+        BestMotifs.append(Dna[i][0:k])
+
+    n = len(Dna[0])
+    for i in range(n-k+1):
+        Motifs = []
+        Motifs.append(Dna[0][i:i+k])
+        for j in range(1, t):
+            P = ProfileWithPseudocounts(Motifs[0:j])
+            Motifs.append(ProfileMostProbableKmer(Dna[j], k, P))
+
+        if Score(Motifs) < Score(BestMotifs):
+            BestMotifs = Motifs
+    return BestMotifs
+
+# Input:  A profile matrix Profile and a list of strings Dna
+# Output: Motifs(Profile, Dna)
+def Motifs(Profile, Dna):
+    n=len(Profile['A'])
+    result=[]
+    for item in Dna:
+        result.append(ProfileMostProbableKmer(item,n,Profile))
+    return result
+
+# Input:  A list of strings Dna, and integers k and t
+# Output: RandomMotifs(Dna, k, t)
+# HINT:   You might not actually need to use t since t = len(Dna), but you may find it convenient
+def RandomMotifs(Dna, k, t):
+    result=[]
+    for i in range(t):   
+        rnd=random.randint(0, len(Dna[i])-k)
+        result.append(Dna[i][rnd:rnd+k])
+    return result
+
+# Input:  Positive integers k and t, followed by a list of strings Dna
+# Output: RandomizedMotifSearch(Dna, k, t)
+def RandomizedMotifSearch(Dna, k, t):
+    M = RandomMotifs(Dna, k, t)
+    BestMotifs = M
+    while True:
+        Profile = ProfileWithPseudocounts(M)
+        M = Motifs(Profile, Dna)
+        if Score(M) < Score(BestMotifs):
+            BestMotifs = M
+        else:
+            return BestMotifs 
