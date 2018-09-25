@@ -100,3 +100,23 @@ def FasterSymbolArray(Genome, symbol):
         if ExtendedGenome[i+(n//2)-1] == symbol:
             array[i] = array[i]+1
     return array
+
+
+# Input:  A String Genome
+# Output: The skew array of Genome as a list.
+def SkewArray(Genome):
+    skew=[]
+    skew.append(0)
+    for i in range(len(Genome)):
+        if  Genome[i] =='G':
+            skew.append(skew[i]+1)
+        elif  Genome[i] =='C':
+            skew.append(skew[i]-1)
+        else:
+            skew.append(skew[i])
+    return skew
+         
+
+
+
+
