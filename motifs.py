@@ -180,3 +180,61 @@ def RandomizedMotifSearch(Dna, k, t):
             BestMotifs = M
         else:
             return BestMotifs 
+
+# Input: A dictionary Probabilities, where keys are k-mers and values are the probabilities of these k-mers (which do not necessarily sum up to 1)
+# Output: A normalized dictionary where the probability of each k-mer was divided by the sum of all k-mers' probabilities
+def Normalize(Probabilities):
+    sum=0
+    for i in Probabilities.values():
+        sum=sum+i
+    for symbol in Probabilities.keys():
+        Probabilities[symbol]=Probabilities[symbol]/sum
+    return Probabilities
+
+# first, import the random package
+import random
+# Input:  A dictionary Probabilities whose keys are k-mers and whose values are the probabilities of these kmers
+# Output: A randomly chosen k-mer with respect to the values in Probabilities
+def WeightedDie(Probabilities):
+    kmer = '' # output variable
+    prob=0
+    rnd=random.uniform(0, 1)
+    for i in Probabilities:
+       # print(str(prob) +' '+str(prob+Probabilities[i]))
+        if prob<rnd<prob+Probabilities[i]:
+            kmer=i
+            break
+        else:
+            prob=prob+Probabilities[i]
+    return kmer
+
+# Input:  A string Text, a profile matrix Profile, and an integer k
+# Output: ProfileGeneratedString(Text, profile, k)
+def ProfileGeneratedString(Text, profile, k):
+    n = len(Text)
+    probabilities = {} 
+    for i in range(0,n-k+1):
+        probabilities[Text[i:i+k]] = Pr(Text[i:i+k], profile)
+    probabilities = Normalize(probabilities)
+    return WeightedDie(probabilities)
+
+# Input:  Integers k, t, and N, followed by a collection of strings Dna
+# Output: GibbsSampler(Dna, k, t, N)
+# TODO
+def GibbsSampler(Dna, k, t, N):
+    BestMotifs = [] # output variable
+    for i in range(0, t):
+        BestMotifs.append(Dna[i][0:k]) 
+    
+    for j in range(1,N):
+        i=random.randint(0,t)
+        n = len(Dna[0])
+        for i in range(n-k+1):
+            Motifs = []
+            Motifs.append(Dna[0][i:i+k])
+            for j in range(1, t):
+                P = ProfileWithPseudocounts(Motifs[0:j])
+                Motifs.append(ProfileMostProbableKmer(Dna[j], k, P))
+        if Score(Motifs) < Score(BestMotifs):
+            BestMotifs = Motifs
+        return BestMotifs
